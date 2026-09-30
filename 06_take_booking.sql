@@ -2,6 +2,13 @@
 SELECT r.room_id AS r104 FROM rooms r JOIN properties p USING (property_id)
   WHERE p.name = 'Kaveri Riverside' AND r.room_number = '104' \gset
 
+-- Clear leftovers from earlier runs so this script can be rerun
+DELETE FROM payments WHERE booking_id IN
+  (SELECT booking_id FROM bookings
+   WHERE room_id = :r104 AND stay = daterange('2026-10-10','2026-10-13'));
+DELETE FROM bookings
+  WHERE room_id = :r104 AND stay = daterange('2026-10-10','2026-10-13');
+
 \echo === SUCCESS: booking and deposit commit together ===
 BEGIN;
 INSERT INTO bookings (guest_id, room_id, stay, guests_count, nightly_rate)
