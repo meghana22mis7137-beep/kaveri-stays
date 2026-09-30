@@ -1,0 +1,35 @@
+ table_name |            conname             | contype |                                                                definition                                                                 
+------------+--------------------------------+---------+-------------------------------------------------------------------------------------------------------------------------------------------
+ properties | properties_name_key            | u       | UNIQUE (name)
+ properties | properties_pkey                | p       | PRIMARY KEY (property_id)
+ properties | properties_star_rating_check   | c       | CHECK (((star_rating >= 1) AND (star_rating <= 5)))
+ room_types | room_types_max_occupancy_check | c       | CHECK ((max_occupancy > 0))
+ room_types | room_types_name_key            | u       | UNIQUE (name)
+ room_types | room_types_pkey                | p       | PRIMARY KEY (room_type_id)
+ rooms      | rooms_pkey                     | p       | PRIMARY KEY (room_id)
+ rooms      | rooms_property_id_fkey         | f       | FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE RESTRICT
+ rooms      | rooms_room_type_id_fkey        | f       | FOREIGN KEY (room_type_id) REFERENCES room_types(room_type_id) ON DELETE RESTRICT
+ rooms      | uq_property_room_number        | u       | UNIQUE (property_id, room_number)
+ guests     | guests_pkey                    | p       | PRIMARY KEY (guest_id)
+ rate_plans | no_overlapping_rates           | x       | EXCLUDE USING gist (property_id WITH =, room_type_id WITH =, valid WITH &&)
+ rate_plans | rate_plans_nightly_rate_check  | c       | CHECK ((nightly_rate > (0)::numeric))
+ rate_plans | rate_plans_pkey                | p       | PRIMARY KEY (rate_plan_id)
+ rate_plans | rate_plans_property_id_fkey    | f       | FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE RESTRICT
+ rate_plans | rate_plans_room_type_id_fkey   | f       | FOREIGN KEY (room_type_id) REFERENCES room_types(room_type_id) ON DELETE RESTRICT
+ bookings   | bookings_guest_id_fkey         | f       | FOREIGN KEY (guest_id) REFERENCES guests(guest_id) ON DELETE RESTRICT
+ bookings   | bookings_guests_count_check    | c       | CHECK ((guests_count > 0))
+ bookings   | bookings_nightly_rate_check    | c       | CHECK ((nightly_rate > (0)::numeric))
+ bookings   | bookings_pkey                  | p       | PRIMARY KEY (booking_id)
+ bookings   | bookings_room_id_fkey          | f       | FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE RESTRICT
+ bookings   | no_overlapping_bookings        | x       | EXCLUDE USING gist (room_id WITH =, stay WITH &&) WHERE ((status <> ALL (ARRAY['cancelled'::booking_status, 'no_show'::booking_status])))
+ bookings   | valid_stay                     | c       | CHECK (((NOT isempty(stay)) AND (lower(stay) < upper(stay))))
+ payments   | payments_amount_check          | c       | CHECK ((amount > (0)::numeric))
+ payments   | payments_booking_id_fkey       | f       | FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE RESTRICT
+ payments   | payments_idempotency_key_key   | u       | UNIQUE (idempotency_key)
+ payments   | payments_pkey                  | p       | PRIMARY KEY (payment_id)
+ reviews    | reviews_booking_id_fkey        | f       | FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE
+ reviews    | reviews_booking_id_key         | u       | UNIQUE (booking_id)
+ reviews    | reviews_pkey                   | p       | PRIMARY KEY (review_id)
+ reviews    | reviews_rating_check           | c       | CHECK (((rating >= 1) AND (rating <= 5)))
+(31 rows)
+
