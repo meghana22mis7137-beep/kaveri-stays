@@ -1,35 +1,82 @@
- table_name |            conname             | contype |                                                                definition                                                                 
-------------+--------------------------------+---------+-------------------------------------------------------------------------------------------------------------------------------------------
- properties | properties_name_key            | u       | UNIQUE (name)
- properties | properties_pkey                | p       | PRIMARY KEY (property_id)
- properties | properties_star_rating_check   | c       | CHECK (((star_rating >= 1) AND (star_rating <= 5)))
- room_types | room_types_max_occupancy_check | c       | CHECK ((max_occupancy > 0))
- room_types | room_types_name_key            | u       | UNIQUE (name)
- room_types | room_types_pkey                | p       | PRIMARY KEY (room_type_id)
- rooms      | rooms_pkey                     | p       | PRIMARY KEY (room_id)
- rooms      | rooms_property_id_fkey         | f       | FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE RESTRICT
- rooms      | rooms_room_type_id_fkey        | f       | FOREIGN KEY (room_type_id) REFERENCES room_types(room_type_id) ON DELETE RESTRICT
- rooms      | uq_property_room_number        | u       | UNIQUE (property_id, room_number)
- guests     | guests_pkey                    | p       | PRIMARY KEY (guest_id)
- rate_plans | no_overlapping_rates           | x       | EXCLUDE USING gist (property_id WITH =, room_type_id WITH =, valid WITH &&)
- rate_plans | rate_plans_nightly_rate_check  | c       | CHECK ((nightly_rate > (0)::numeric))
- rate_plans | rate_plans_pkey                | p       | PRIMARY KEY (rate_plan_id)
- rate_plans | rate_plans_property_id_fkey    | f       | FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE RESTRICT
- rate_plans | rate_plans_room_type_id_fkey   | f       | FOREIGN KEY (room_type_id) REFERENCES room_types(room_type_id) ON DELETE RESTRICT
- bookings   | bookings_guest_id_fkey         | f       | FOREIGN KEY (guest_id) REFERENCES guests(guest_id) ON DELETE RESTRICT
- bookings   | bookings_guests_count_check    | c       | CHECK ((guests_count > 0))
- bookings   | bookings_nightly_rate_check    | c       | CHECK ((nightly_rate > (0)::numeric))
- bookings   | bookings_pkey                  | p       | PRIMARY KEY (booking_id)
- bookings   | bookings_room_id_fkey          | f       | FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE RESTRICT
- bookings   | no_overlapping_bookings        | x       | EXCLUDE USING gist (room_id WITH =, stay WITH &&) WHERE ((status <> ALL (ARRAY['cancelled'::booking_status, 'no_show'::booking_status])))
- bookings   | valid_stay                     | c       | CHECK (((NOT isempty(stay)) AND (lower(stay) < upper(stay))))
- payments   | payments_amount_check          | c       | CHECK ((amount > (0)::numeric))
- payments   | payments_booking_id_fkey       | f       | FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE RESTRICT
- payments   | payments_idempotency_key_key   | u       | UNIQUE (idempotency_key)
- payments   | payments_pkey                  | p       | PRIMARY KEY (payment_id)
- reviews    | reviews_booking_id_fkey        | f       | FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE
- reviews    | reviews_booking_id_key         | u       | UNIQUE (booking_id)
- reviews    | reviews_pkey                   | p       | PRIMARY KEY (review_id)
- reviews    | reviews_rating_check           | c       | CHECK (((rating >= 1) AND (rating <= 5)))
-(31 rows)
+# Constraint inventory and HTTP mapping
 
+| Table | Constraint | Type | Rule | SQLSTATE | HTTP |
+|---|---|---|---|---|---|
+| properties | properties_name_key | unique | 1 | 23505 | 409 |
+| properties | properties_star_rating_check | check | 1 | 23514 | 422 |
+| room_types | room_types_name_key | unique | 3 | 23505 | 409 |
+| room_types | room_types_max_occupancy_check | check | 3 | 23514 | 422 |
+| rooms | uq_property_room_number | unique | 2 | 23505 | 409 |
+| rooms | rooms_property_id_fkey / rooms_room_type_id_fkey | fk | 1, 2, 3 | 23503 | 422 on insert, 409 on delete |
+| guests | uq_guests_email_lower (index) | unique index | 10 | 23505 | 409 |
+| rate_plans | no_overlapping_rates | exclusion | 6 | 23P01 | 409 |
+| rate_plans | rate_plans_nightly_rate_check | check | 6 | 23514 | 422 |
+| rate_plans | rate_plans_*_fkey | fk | 6 | 23503 | 422 |
+| bookings | no_overlapping_bookings | exclusion | 4, 5 | 23P01 | 409 |
+| bookings | valid_stay | check | 4 | 23514 | 422 |
+| bookings | bookings_guests_count_check | check | 3 | 23514 | 422 |
+| bookings | bookings_nightly_rate_check | check | 6 | 23514 | 422 |
+| bookings | bookings_guest_id_fkey / bookings_room_id_fkey | fk | n/a | 23503 | 422 |
+| bookings | trg_check_occupancy (trigger) | trigger | 3 | 23514 | 422 |
+| bookings | (backwards date range) | range error | 4 | 22000 | 422 |
+| bookings | (invalid status) | enum error | 7 | 22P02 | 422 |
+| payments | payments_amount_check | check | 8 | 23514 | 422 |
+| payments | payments_idempotency_key_key | unique | 8 | 23505 | 200 with the original payment (retry) |
+| payments | payments_booking_id_fkey | fk | 8 | 23503 | 404 |
+| reviews | reviews_booking_id_key | unique | 9 | 23505 | 409 |
+| reviews | reviews_rating_check | check | 9 | 23514 | 422 |
+| reviews | trg_check_review_allowed (trigger) | trigger | 9 | 23514 | 409 |
+| (any) | aborted transaction | session state | n/a | 25P02 | 500 (our code did not roll back) |
+
+Distinct HTTP codes used: 409, 422, 404, 500 (and 200 for a replayed payment).
+
+## Task 1.3: well-formed requests that only conflict with existing data
+1. **Duplicate Guest Registration (`POST /guests`)**:
+   Payload: `{"full_name": "Aarav Sharma", "email": "AARAV.SHARMA@EXAMPLE.COM", "phone": "+919876543210"}`
+   - The JSON syntax and fields are 100% valid.
+   - However, the guest table already contains this email (case-insensitive).
+   - Database raises `23505` (`uq_guests_email_lower`).
+   - HTTP response: `409 Conflict` (`"A guest with this email is already registered"`).
+
+2. **Overlapping Booking Dates (`POST /bookings`)**:
+   Payload: `{"guest_id": 5, "room_id": 4, "check_in": "2026-01-12", "check_out": "2026-01-15", "guests_count": 2, "nightly_rate": 3800}`
+   - Dates are chronological, occupancy is within limits, foreign keys exist.
+   - However, Room 4 already has a confirmed booking for `[2026-01-10, 2026-01-14)`.
+   - Database raises `23P01` (`no_overlapping_bookings` exclusion constraint).
+   - HTTP response: `409 Conflict` (`"Selected room is already booked for the requested dates"`).
+
+3. **Duplicate Review for Single Booking (`POST /reviews`)**:
+   Payload: `{"booking_id": 1, "rating": 5, "comments": "Second review attempt"}`
+   - Booking 1 exists and is in `checked_out` status; rating is valid (1-5).
+   - However, Booking 1 already has a review in the database.
+   - Database raises `23505` (`reviews_booking_id_key`).
+   - HTTP response: `409 Conflict` (`"A review has already been submitted for this booking"`).
+
+## Task 1.4: what a client may see from an exclusion violation
+When an exclusion constraint violation occurs (SQLSTATE `23P01`), PostgreSQL outputs:
+- **Error**: `23P01: conflicting key value violates exclusion constraint "no_overlapping_bookings"`
+- **Detail**: `Key (room_id, stay)=(4, [2026-01-12,2026-01-15)) conflicts with existing key (room_id, stay)=(4, [2026-01-10,2026-01-14)).`
+
+A raw database error should never be exposed verbatim to clients. Instead, the FastAPI error handler intercepts SQLSTATE `23P01` and returns:
+- **HTTP Status Code**: `409 Conflict`
+- **Response Headers**: `Content-Type: application/json`
+- **Response Body**:
+```json
+{
+  "status_code": 409,
+  "error": "Conflict",
+  "code": "ROOM_UNAVAILABLE",
+  "message": "The requested room is unavailable for the selected dates because it conflicts with an existing reservation.",
+  "constraint": "no_overlapping_bookings"
+}
+```
+If the exclusion violation is from `no_overlapping_rates`, the client instead receives:
+```json
+{
+  "status_code": 409,
+  "error": "Conflict",
+  "code": "RATE_PLAN_OVERLAP",
+  "message": "The specified rate plan validity period overlaps with an existing rate plan for this room type.",
+  "constraint": "no_overlapping_rates"
+}
+```

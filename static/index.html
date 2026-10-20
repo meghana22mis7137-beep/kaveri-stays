@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kaveri Stays | Luxury Heritage Resorts & Reservation Platform</title>
+  <meta name="description" content="Experience tranquil luxury at Kaveri Stays. Enforcing robust database consistency, zero double-bookings, and seamless reservation lifecycle management across Coorg, Ooty, and Alleppey.">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="header">
+    <div class="container navbar">
+      <a href="/" class="brand">
+        <div class="brand-icon">K</div>
+        <div class="brand-text">
+          <h1>Kaveri Stays</h1>
+          <span>Heritage Resorts & Stays</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#properties-section" class="nav-link" id="nav-properties">Properties</a></li>
+        <li><a href="#booking-section" class="nav-link" id="nav-booking">Check Availability</a></li>
+        <li><a href="#reservations-section" class="nav-link" id="nav-reservations">Reservations</a></li>
+        <li><a href="#reviews-section" class="nav-link" id="nav-reviews">Guest Reviews</a></li>
+        <li><a href="#attack-lab-section" class="nav-link" id="nav-lab">Constraint Lab</a></li>
+      </ul>
+
+      <div class="header-actions">
+        <div id="db-status" class="db-status-pill">
+          <span class="status-dot"></span>
+          <span id="db-status-text">Connecting...</span>
+        </div>
+        <a href="/docs" target="_blank" class="btn btn-secondary btn-sm" id="btn-api-docs">API Docs ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Banner -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-badge">✦ Signature South Indian Sanctuary ✦</div>
+        <h2 class="hero-title">Where Tranquility Meets Flawless Consistency</h2>
+        <p class="hero-subtitle">
+          Immerse yourself in nature's purest retreats across Coorg, Ooty, and Alleppey. Backed by PostgreSQL 17 exclusion constraints for guaranteed zero double-bookings and true transactional atomic deposits.
+        </p>
+
+        <!-- Quick Stats -->
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-value" id="stat-properties-count">3</span>
+            <span class="stat-label">Luxury Properties</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="stat-rooms-count">36</span>
+            <span class="stat-label">Exclusive Rooms</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="stat-exclusion-rate">100%</span>
+            <span class="stat-label">ACID & Exclusion Enforced</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="stat-bookings-count">0</span>
+            <span class="stat-label">Active Bookings</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Properties Showcase Section -->
+    <section class="section" id="properties-section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="section-tag">Destinations</span>
+            <h2 class="section-title">Our Signature Retreats</h2>
+            <p class="section-desc">Each property is architected to honor its natural geography, offering Standard, Deluxe, and Royal Suites.</p>
+          </div>
+          <div>
+            <button class="btn btn-secondary btn-sm" id="btn-refresh-properties">↻ Refresh Properties</button>
+          </div>
+        </div>
+
+        <div class="properties-grid" id="properties-grid-container">
+          <!-- Dynamically populated or rendered -->
+          <div class="property-card" id="prop-card-1">
+            <div class="property-image-wrapper">
+              <img src="/static/images/riverside.jpg" alt="Kaveri Riverside" class="property-image">
+              <div class="property-badge">
+                <span class="stars">★★★★</span>
+                <span>4 Star</span>
+              </div>
+            </div>
+            <div class="property-content">
+              <div class="property-city">Coorg, Karnataka</div>
+              <h3 class="property-name">Kaveri Riverside</h3>
+              <p class="property-desc">Nestled directly along the pristine banks of River Kaveri, surrounded by aromatic coffee plantations, private sun decks, and peaceful water vistas.</p>
+              <div class="room-types-chips">
+                <span class="chip">Standard (Max 2)</span>
+                <span class="chip">Deluxe (Max 3)</span>
+                <span class="chip highlight">Suite (Max 4)</span>
+              </div>
+              <div class="property-footer">
+                <div class="price-tag">
+                  <span>Starting From</span>
+                  <strong>₹3,800 <small>/ night</small></strong>
+                </div>
+                <button class="btn btn-primary btn-sm btn-filter-prop" data-prop-id="1">View Availability</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="property-card" id="prop-card-2">
+            <div class="property-image-wrapper">
+              <img src="/static/images/hilltop.jpg" alt="Kaveri Hilltop" class="property-image">
+              <div class="property-badge">
+                <span class="stars">★★★★★</span>
+                <span>5 Star</span>
+              </div>
+            </div>
+            <div class="property-content">
+              <div class="property-city">Ooty, Tamil Nadu</div>
+              <h3 class="property-name">Kaveri Hilltop</h3>
+              <p class="property-desc">Perched high atop misty Nilgiri tea hills. Features colonial stone stone manors, outdoor fire pits under starlit skies, and panoramic valley terraces.</p>
+              <div class="room-types-chips">
+                <span class="chip">Standard (Max 2)</span>
+                <span class="chip">Deluxe (Max 3)</span>
+                <span class="chip highlight">Suite (Max 4)</span>
+              </div>
+              <div class="property-footer">
+                <div class="price-tag">
+                  <span>Starting From</span>
+                  <strong>₹5,320 <small>/ night</small></strong>
+                </div>
+                <button class="btn btn-primary btn-sm btn-filter-prop" data-prop-id="2">View Availability</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="property-card" id="prop-card-3">
+            <div class="property-image-wrapper">
+              <img src="/static/images/backwater.jpg" alt="Kaveri Backwater" class="property-image">
+              <div class="property-badge">
+                <span class="stars">★★★★</span>
+                <span>4 Star</span>
+              </div>
+            </div>
+            <div class="property-content">
+              <div class="property-city">Alleppey, Kerala</div>
+              <h3 class="property-name">Kaveri Backwater</h3>
+              <p class="property-desc">Traditional heritage villas flanked by swaying coconut groves and tranquil emerald lagoons, offering traditional teak woodwork and private infinity pools.</p>
+              <div class="room-types-chips">
+                <span class="chip">Standard (Max 2)</span>
+                <span class="chip">Deluxe (Max 3)</span>
+                <span class="chip highlight">Suite (Max 4)</span>
+              </div>
+              <div class="property-footer">
+                <div class="price-tag">
+                  <span>Starting From</span>
+                  <strong>₹3,800 <small>/ night</small></strong>
+                </div>
+                <button class="btn btn-primary btn-sm btn-filter-prop" data-prop-id="3">View Availability</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Availability & Instant Booking Engine -->
+    <section class="section" id="booking-section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="section-tag">Booking Engine</span>
+            <h2 class="section-title">Check Real-Time Room Availability</h2>
+            <p class="section-desc">Search available rooms across date ranges with automatic same-day turnover validation and max-occupancy checks.</p>
+          </div>
+        </div>
+
+        <div class="search-card">
+          <form id="search-availability-form" class="search-form">
+            <div class="form-group">
+              <label class="form-label" for="search-check-in">Check-In Date</label>
+              <input type="date" id="search-check-in" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="search-check-out">Check-Out Date</label>
+              <input type="date" id="search-check-out" class="form-control" required>
+              <span class="form-hint" id="nights-counter-hint">Stay: 1 night</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="search-guests">Guests</label>
+              <select id="search-guests" class="form-control">
+                <option value="1">1 Guest</option>
+                <option value="2" selected>2 Guests (Standard / Deluxe / Suite)</option>
+                <option value="3">3 Guests (Deluxe / Suite)</option>
+                <option value="4">4 Guests (Suite Only)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="search-property">Resort Filter</label>
+              <select id="search-property" class="form-control">
+                <option value="">All 3 Properties</option>
+                <option value="1">Kaveri Riverside (Coorg)</option>
+                <option value="2">Kaveri Hilltop (Ooty)</option>
+                <option value="3">Kaveri Backwater (Alleppey)</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn-search-rooms">
+              <span>Find Available Rooms</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Available Rooms Grid Results -->
+        <div id="availability-results-section" style="display: none;">
+          <h3 style="font-family: var(--font-heading); margin-bottom: 1.25rem;" id="results-headline">
+            Available Rooms
+          </h3>
+          <div class="rooms-grid" id="rooms-results-container">
+            <!-- Dynamic room cards -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reservations Lifecycle Manager -->
+    <section class="section" id="reservations-section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="section-tag">Operations</span>
+            <h2 class="section-title">Live Reservations & Guest Stays</h2>
+            <p class="section-desc">Manage guest lifecycle states adhering to the state machine transitions: Confirmed → Checked In → Checked Out.</p>
+          </div>
+          <div>
+            <button class="btn btn-primary btn-sm" id="btn-open-quick-booking">+ New Reservation</button>
+          </div>
+        </div>
+
+        <div class="filter-tabs" id="status-filter-tabs">
+          <button class="tab-btn active" data-status="">All Stays</button>
+          <button class="tab-btn" data-status="confirmed">Confirmed</button>
+          <button class="tab-btn" data-status="checked_in">Checked In</button>
+          <button class="tab-btn" data-status="checked_out">Checked Out</button>
+          <button class="tab-btn" data-status="cancelled">Cancelled</button>
+          <button class="tab-btn" data-status="no_show">No Show</button>
+        </div>
+
+        <div class="bookings-grid" id="bookings-list-container">
+          <!-- Loaded dynamically -->
+          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-dim);">
+            Loading active reservations...
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Guest Reviews Showcase -->
+    <section class="section" id="reviews-section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="section-tag">Feedback</span>
+            <h2 class="section-title">Guest Reviews & Ratings</h2>
+            <p class="section-desc">Rule 9 in practice: Reviews are allowed strictly after checkout and limited to 1 per booking.</p>
+          </div>
+        </div>
+
+        <div class="reviews-grid" id="reviews-list-container">
+          <!-- Dynamically loaded -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Constraint & Attack Lab (The Break-It Lab) -->
+    <section class="section" id="attack-lab-section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="section-tag">Interactive Database Lab</span>
+            <h2 class="section-title">Constraint Verification & "Break-It" Playground</h2>
+            <p class="section-desc">Live attack simulation testing every PostgreSQL database constraint from <code>01_constraints_raw.txt</code> and <code>05_break_it.sql</code>.</p>
+          </div>
+        </div>
+
+        <div class="lab-card">
+          <div class="lab-intro">
+            <span class="lab-intro-icon">🛡️</span>
+            <div>
+              <strong>Why This Matters:</strong> In Kaveri Stays, business rules are not just checked in UI code; they are guaranteed by PostgreSQL exclusion constraints, foreign keys, and PL/pgSQL triggers. Click "Run Test" on any scenario below to see the FastAPI error translator intercept the SQLSTATE and return the documented HTTP code.
+            </div>
+          </div>
+
+          <div class="attack-grid">
+            <!-- 5.1 Overlap Attack -->
+            <div class="attack-item" id="attack-card-5-1">
+              <div class="attack-header">
+                <span class="attack-code">Attack 5.1</span>
+                <span class="attack-expected">SQLSTATE 23P01 → 409</span>
+              </div>
+              <h4 class="attack-title">Double-Booking Collision</h4>
+              <p class="attack-desc">Attempts to book Room 101 for [2026-01-12, 2026-01-15), which overlaps with existing reservation [2026-01-10, 2026-01-14).</p>
+              <button class="btn btn-danger btn-sm btn-run-attack" data-attack="5.1">Execute Collision Attack</button>
+            </div>
+
+            <!-- 5.2 Backwards Dates -->
+            <div class="attack-item" id="attack-card-5-2">
+              <div class="attack-header">
+                <span class="attack-code">Attack 5.2</span>
+                <span class="attack-expected">SQLSTATE 22000 → 422</span>
+              </div>
+              <h4 class="attack-title">Chronological Reversal</h4>
+              <p class="attack-desc">Submits check-out (2026-05-01) prior to check-in (2026-05-05) violating the <code>valid_stay</code> check constraint.</p>
+              <button class="btn btn-danger btn-sm btn-run-attack" data-attack="5.2">Execute Reverse Dates</button>
+            </div>
+
+            <!-- 5.4 Capacity Overbooking -->
+            <div class="attack-item" id="attack-card-5-4">
+              <div class="attack-header">
+                <span class="attack-code">Attack 5.4</span>
+                <span class="attack-expected">Trigger 23514 → 422</span>
+              </div>
+              <h4 class="attack-title">Capacity Overbooking</h4>
+              <p class="attack-desc">Attempts to book 4 guests into a Standard Room (max capacity 2). Intercepted by <code>trg_check_occupancy</code>.</p>
+              <button class="btn btn-danger btn-sm btn-run-attack" data-attack="5.4">Execute Over-Capacity</button>
+            </div>
+
+            <!-- 5.8 Case Insensitive Email -->
+            <div class="attack-item" id="attack-card-5-8">
+              <div class="attack-header">
+                <span class="attack-code">Attack 5.8</span>
+                <span class="attack-expected">Index 23505 → 409</span>
+              </div>
+              <h4 class="attack-title">Duplicate Email Casing</h4>
+              <p class="attack-desc">Registers <code>AARAV.SHARMA@EXAMPLE.COM</code> when lowercase already exists. Intercepted by <code>uq_guests_email_lower</code>.</p>
+              <button class="btn btn-danger btn-sm btn-run-attack" data-attack="5.8">Execute Duplicate Email</button>
+            </div>
+
+            <!-- 5.10 Negative Payment -->
+            <div class="attack-item" id="attack-card-5-10">
+              <div class="attack-header">
+                <span class="attack-code">Attack 5.10</span>
+                <span class="attack-expected">CHECK 23514 → 422</span>
+              </div>
+              <h4 class="attack-title">Negative Payment Amount</h4>
+              <p class="attack-desc">Submits a payment of -₹500. Intercepted by <code>payments_amount_check</code>.</p>
+              <button class="btn btn-danger btn-sm btn-run-attack" data-attack="5.10">Execute Negative Payment</button>
+            </div>
+
+            <!-- 5.12 Duplicate Review -->
+            <div class="attack-item" id="attack-card-5-12">
+              <div class="attack-header">
+                <span class="attack-code">Attack 5.12</span>
+                <span class="attack-expected">Unique 23505 → 409</span>
+              </div>
+              <h4 class="attack-title">Duplicate Review</h4>
+              <p class="attack-desc">Submits a second review for Booking 1 which already has one. Intercepted by <code>reviews_booking_id_key</code>.</p>
+              <button class="btn btn-danger btn-sm btn-run-attack" data-attack="5.12">Execute Duplicate Review</button>
+            </div>
+
+            <!-- 5.13 Premature Review -->
+            <div class="attack-item" id="attack-card-5-13">
+              <div class="attack-header">
+                <span class="attack-code">Attack 5.13</span>
+                <span class="attack-expected">Trigger 23514 → 409</span>
+              </div>
+              <h4 class="attack-title">Review Before Checkout</h4>
+              <p class="attack-desc">Attempts to submit review for Booking 2 while status is still 'confirmed'. Blocked by <code>trg_check_review_allowed</code>.</p>
+              <button class="btn btn-danger btn-sm btn-run-attack" data-attack="5.13">Execute Premature Review</button>
+            </div>
+
+            <!-- 5.15 Same-Day Turnover -->
+            <div class="attack-item" id="attack-card-5-15">
+              <div class="attack-header">
+                <span class="attack-code">Test 5.15</span>
+                <span class="attack-expected" style="color: var(--emerald);">Rule 5 → 201 OK</span>
+              </div>
+              <h4 class="attack-title">Same-Day Turnover (Valid)</h4>
+              <p class="attack-desc">Guest A checks out June 5th; Guest B checks in June 5th. Demonstrates half-open [) daterange non-collision.</p>
+              <button class="btn btn-success btn-sm btn-run-attack" data-attack="5.15">Verify Turnover Success</button>
+            </div>
+
+            <!-- 6.0 Atomic Deposit Rollback -->
+            <div class="attack-item" id="attack-card-6-0">
+              <div class="attack-header">
+                <span class="attack-code">Test 6.0</span>
+                <span class="attack-expected">ACID Rollback → 422</span>
+              </div>
+              <h4 class="attack-title">Atomic Deposit Rollback</h4>
+              <p class="attack-desc">Simulates a booking with a negative deposit. Verifies that the booking is completely rolled back and no orphan is left behind.</p>
+              <button class="btn btn-danger btn-sm btn-run-attack" data-attack="6.0">Simulate Deposit Failure</button>
+            </div>
+          </div>
+
+          <!-- Code / Response Inspector -->
+          <div class="code-inspector">
+            <div class="inspector-header">
+              <div class="inspector-title">
+                <span>⚡ Live Server Response Inspector</span>
+                <span id="inspector-status-badge" class="status-badge" style="display: none;"></span>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-clear-inspector">Clear</button>
+            </div>
+            <pre class="json-output" id="inspector-output">// Click any attack or test above to run the live payload against the backend...</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p><strong>Kaveri Stays</strong> · Enterprise Reservation Consistency Architecture</p>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-dim);">
+        Powered by FastAPI, PostgreSQL 17 GiST Exclusions, and Strict Transition State Machines.
+      </p>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       MODALS
+       ========================================================================== -->
+
+  <!-- 1. Booking Creation Modal -->
+  <div class="modal-backdrop" id="modal-booking">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-booking-title">Reserve Room</h3>
+        <button class="modal-close" data-close-modal="modal-booking">&times;</button>
+      </div>
+      <form id="form-create-booking">
+        <div class="modal-body">
+          <input type="hidden" id="booking-room-id">
+          
+          <div class="form-group">
+            <label class="form-label" for="booking-guest-id">Select Guest</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <select id="booking-guest-id" class="form-control" required style="flex-grow: 1;">
+                <option value="">Choose registered guest...</option>
+              </select>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-quick-new-guest">+ New</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="booking-check-in">Check-In</label>
+              <input type="date" id="booking-check-in" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="booking-check-out">Check-Out</label>
+              <input type="date" id="booking-check-out" class="form-control" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="booking-guests-count">Guests Count</label>
+              <input type="number" id="booking-guests-count" class="form-control" min="1" max="4" value="2" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="booking-nightly-rate">Nightly Rate (₹)</label>
+              <input type="number" id="booking-nightly-rate" class="form-control" min="1" value="3800" required>
+            </div>
+          </div>
+
+          <!-- Atomic Deposit Toggle -->
+          <div style="background: var(--bg-surface); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+              <label style="font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="booking-include-deposit" checked>
+                <span>Include Deposit Payment (Atomic Transaction)</span>
+              </label>
+              <span class="chip highlight" style="font-size: 0.7rem;">Rule 8 / Task 6</span>
+            </div>
+
+            <div id="deposit-fields" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div class="form-group">
+                <label class="form-label" for="booking-deposit-amount">Deposit Amount (₹)</label>
+                <input type="number" id="booking-deposit-amount" class="form-control" min="1" value="3800">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="booking-deposit-method">Payment Method</label>
+                <select id="booking-deposit-method" class="form-control">
+                  <option value="upi">UPI</option>
+                  <option value="card">Credit/Debit Card</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="cash">Cash</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="stay-range-box">
+            <span id="booking-calc-summary">Total: ₹3,800 · 1 Night</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Zero Overlap Guaranteed</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="modal-booking">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-booking">Confirm Reservation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Guest Registration Modal -->
+  <div class="modal-backdrop" id="modal-guest">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Register New Guest</h3>
+        <button class="modal-close" data-close-modal="modal-guest">&times;</button>
+      </div>
+      <form id="form-create-guest">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="guest-full-name">Full Name</label>
+            <input type="text" id="guest-full-name" class="form-control" placeholder="e.g. Rohith Verma" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="guest-email">Email Address</label>
+            <input type="email" id="guest-email" class="form-control" placeholder="rohith@example.com" required>
+            <span class="form-hint">Rule 10: Email uniqueness is case-insensitive.</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="guest-phone">Phone Number</label>
+              <input type="tel" id="guest-phone" class="form-control" placeholder="+91 98765 43210">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="guest-city">City</label>
+              <input type="text" id="guest-city" class="form-control" placeholder="e.g. Bengaluru">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="modal-guest">Cancel</button>
+          <button type="submit" class="btn btn-primary">Register Guest</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Record Payment Modal -->
+  <div class="modal-backdrop" id="modal-payment">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Record Payment</h3>
+        <button class="modal-close" data-close-modal="modal-payment">&times;</button>
+      </div>
+      <form id="form-record-payment">
+        <div class="modal-body">
+          <input type="hidden" id="payment-booking-id">
+          
+          <div style="background: var(--bg-surface); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);" id="payment-booking-info">
+            <!-- Dynamic info -->
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="payment-amount">Amount (₹)</label>
+              <input type="number" id="payment-amount" class="form-control" min="1" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="payment-method">Payment Method</label>
+              <select id="payment-method" class="form-control">
+                <option value="upi">UPI</option>
+                <option value="card">Card</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="cash">Cash</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="payment-idempotency-key">Idempotency Key</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="text" id="payment-idempotency-key" class="form-control" placeholder="e.g. pay-uuid-12345">
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-gen-idempotency">Generate</button>
+            </div>
+            <span class="form-hint">Rule 8: Replaying the same key returns HTTP 200 with original payment without double charging.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="modal-payment">Cancel</button>
+          <button type="submit" class="btn btn-primary">Process Payment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Review Modal -->
+  <div class="modal-backdrop" id="modal-review">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Write Guest Review</h3>
+        <button class="modal-close" data-close-modal="modal-review">&times;</button>
+      </div>
+      <form id="form-submit-review">
+        <div class="modal-body">
+          <input type="hidden" id="review-booking-id">
+          
+          <div style="background: var(--bg-surface); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);" id="review-booking-info">
+            <!-- Dynamic info -->
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="review-rating">Rating (1 to 5 Stars)</label>
+            <select id="review-rating" class="form-control" required>
+              <option value="5">★★★★★ (5 - Exceptional)</option>
+              <option value="4">★★★★☆ (4 - Very Good)</option>
+              <option value="3">★★★☆☆ (3 - Average)</option>
+              <option value="2">★★☆☆☆ (2 - Poor)</option>
+              <option value="1">★☆☆☆☆ (1 - Terrible)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="review-comments">Comments</label>
+            <textarea id="review-comments" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
+            <span class="form-hint">Rule 9: Reviews are strictly accepted only after checkout!</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="modal-review">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Client Script -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
